@@ -11,8 +11,10 @@ const engine = Engine.create();
 const world = engine.world;
 const chainConstraints = [];
 const balls = [];
+const replicators = [];
 const blobColors = ["red", "blue", "green", "yellow"]; // Use CSS color names
-
+const allowedConnections = generateAllowedConnections(blobColors);
+console.log(allowedConnections);
 // Disable gravity
 engine.world.gravity.y = 0;
 
@@ -45,6 +47,8 @@ for (let i = 0; i < 100; i++) {
   balls.push(ball);
   World.add(world, ball);
 }
+
+createReplicator();
 
 // Add a wind-like force to push balls randomly
 Events.on(engine, "beforeUpdate", function () {

@@ -22,12 +22,19 @@ function handleCollisions(event) {
       isReplicator(bodyA) !== isReplicator(bodyB) &&
       countBlobConnections(replicator) <= checkReplicatorConnection(replicator)
     ) {
+      // Get the position of the replicator and the other body
       const replicatorPosition = replicator.position;
       const otherBodyPosition =
         replicator === bodyA ? bodyB.position : bodyA.position;
 
+      // Calculate the direction vector from the replicator to the other body
+      const directionVector = Matter.Vector.sub(
+        otherBodyPosition,
+        replicatorPosition
+      );
+
       // Calculate the angle of the direction vector
-      const angle = Matter.Vector.angle(replicatorPosition, otherBodyPosition);
+      const angle = Matter.Vector.angle(directionVector);
 
       // Determine which side of the replicator the other body is on based on the angle
       let side = null;
@@ -41,30 +48,28 @@ function handleCollisions(event) {
         side = "top";
       }
 
-      if (side == "top") {
+      console.log(side);
+
+      // Check if the replicator side is already connected
+      if (!isReplicatorSideConnected(replicator, side)) {
         const constraint = Constraint.create({
-          bodyA: bodyA,
-          bodyB: bodyB,
+          bodyA: replicator,
+          bodyB: bodyA === replicator ? bodyB : bodyA,
           length: 60,
           stiffness: 0.8,
         });
         World.add(world, constraint);
         chainConstraints.push(constraint);
+
+        // Mark the replicator side as connected
+        markReplicatorSideAsConnected(replicator, side);
       }
     }
   });
 }
 
-function checkReplicatorConnection(replicator) {
-  if (
-    replicator.render.fillStyle === "red" ||
-    replicator.render.fillStyle === "yellow"
-  ) {
-    return 1;
-  } else {
-    return 2; // Change to 2 to allow a maximum of two connections for other replicators
-  }
-}
+// Keep track of connected sides of replicators
+const replicatorSidesConnected = new Map();
 
 // Function to generate allowed connections
 // Function to generate allowed connections based on vicinity
@@ -79,22 +84,41 @@ function generateAllowedConnections(colors) {
 
   return allowedConnections;
 }
+function markReplicatorSideAsConnected(replicator, side) {
+  if (!replicatorSidesConnected.has(replicator)) {
+    replicatorSidesConnected.set(replicator, []);
+  }
 
-// Function to check if two colors should be connected
-function shouldConnect(colorA, colorB) {
-  // Check if the pair of colors is in the allowed connections
-  return allowedConnections.some(
-    (connection) =>
-      (connection.color1 === colorA && connection.color2 === colorB) ||
-      (connection.color1 === colorB && connection.color2 === colorA)
-  );
+  replicatorSidesConnected.get(replicator).push(side);
 }
-function isReplicator(body) {
-  return replicators.some((replicator) => replicator.includes(body));
+
+function isReplicatorSideConnected(replicator, side) {
+  if (replicatorSidesConnected.has(replicator)) {
+    return replicatorSidesConnected.get(replicator).includes(side);
+  }
+
+  return false;
 }
+
+function checkReplicatorConnection(replicator) {
+  if (
+    replicator.render.fillStyle === "red" ||
+    replicator.render.fillStyle === "yellow"
+  ) {
+    return 1;
+  } else {
+    return 3;
+  }
+}
+
 // Function to count the number of connections for a blob
 function countBlobConnections(blob) {
   return chainConstraints.filter(
     (constraint) => constraint.bodyA === blob || constraint.bodyB === blob
   ).length;
+}
+
+// Function to check if a body is a replicator
+function isReplicator(body) {
+  return replicators.includes(body);
 }
