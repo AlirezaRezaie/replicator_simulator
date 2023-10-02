@@ -19,7 +19,6 @@ function handleCollisions(event) {
       }
       const current = getReplicatorBasedOnAttachments(bodyA, bodyB);
       if (current) {
-        console.log(replicators.indexOf(current));
         currentReplicatorIndex = replicators.indexOf(current);
       }
     });
@@ -99,10 +98,32 @@ function handleCollisions(event) {
           replicators[currentReplicatorIndex].attachedBlobs.length === 4 &&
           replicators[currentReplicatorIndex].attachedBlobs.every(
             (blob) =>
-              countBlobConnections(blob) == checkReplicatorConnection(blob)
+              countBlobConnections(blob) === checkReplicatorConnection1(blob)
           )
         ) {
           console.log("replicator finished replicating time to detatch");
+          var toRemove = [];
+          var chainReplicators = [];
+          chainConstraints.forEach((chain) => {
+            if (
+              isReplicator(chain.bodyA) !== isReplicator(chain.bodyB) ||
+              isReplicator(chain.bodyB) !== isReplicator(chain.bodyA)
+            ) {
+              //const otherBody = currentReplicator === bodyA ? bodyB : bodyA;
+              // chainReplicators.push(otherBody);
+              World.remove(world, chain);
+              //toRemove.push(chain);
+
+              replicators[currentReplicatorIndex].attachedBlobs = [];
+              //replicators.add()
+            }
+          });
+          console.log(chainReplicators);
+          replicators.push({
+            replicator: chainReplicators,
+            attachedBlobs: [],
+          });
+          toRemove.forEach((tr) => chainConstraints.splice(tr, 1));
         }
       }
     }
@@ -146,6 +167,17 @@ function checkReplicatorConnection(replicator) {
     return 1;
   } else {
     return 2; // Change to 2 to allow a maximum of two connections for other replicators
+  }
+}
+
+function checkReplicatorConnection1(replicator) {
+  if (
+    replicator.render.fillStyle === "red" ||
+    replicator.render.fillStyle === "yellow"
+  ) {
+    return 2;
+  } else {
+    return 3; // Change to 2 to allow a maximum of two connections for other replicators
   }
 }
 
