@@ -49,7 +49,6 @@ for (let i = 0; i < 50; i++) {
 }
 
 createReplicator();
-
 // Add a wind-like force to push balls randomly
 Events.on(engine, "beforeUpdate", function () {
   balls.forEach((ball) => {

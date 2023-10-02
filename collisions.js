@@ -16,6 +16,7 @@ function handleCollisions(event) {
       if (rpl.replicator.includes(bodyA) || rpl.replicator.includes(bodyB)) {
         currentReplicatorIndex = replicators.indexOf(rpl);
         currentReplicator = replicators[currentReplicatorIndex].replicator;
+        replicatorBlob = isReplicator(bodyA) ? bodyA : bodyB;
       }
       const current = getReplicatorBasedOnAttachments(bodyA, bodyB);
       if (current) {
@@ -23,16 +24,10 @@ function handleCollisions(event) {
       }
     });
 
-    [(bodyA, bodyB)].forEach((element) => {
-      if (isReplicator(element)) {
-        replicatorBlob = element;
-      }
-    });
-
     // Check if the collision involves blob pairs that should be connected
     if (
       isReplicator(bodyA) !== isReplicator(bodyB) &&
-      countBlobConnections(replicatorBlob) <=
+      countBlobConnections(replicatorBlob) ===
         checkReplicatorConnection(replicatorBlob)
     ) {
       const replicatorPosition = replicatorBlob.position;
@@ -60,10 +55,8 @@ function handleCollisions(event) {
       );
 
       // Calculate the angle of the direction vector
-
-      if (side == "blue" && colorA === colorB) {
+      if (colorA === colorB) {
         replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
-
         const constraint = Constraint.create({
           bodyA: bodyA,
           bodyB: bodyB,
@@ -74,6 +67,8 @@ function handleCollisions(event) {
         chainConstraints.push(constraint);
       }
     }
+
+    // connection between replicator blobs
     if (currentReplicatorIndex !== null) {
       if (
         replicators[currentReplicatorIndex].attachedBlobs.includes(bodyA) &&
@@ -103,27 +98,24 @@ function handleCollisions(event) {
         ) {
           console.log("replicator finished replicating time to detatch");
           var toRemove = [];
-          var chainReplicators = [];
+
           chainConstraints.forEach((chain) => {
             if (
               isReplicator(chain.bodyA) !== isReplicator(chain.bodyB) ||
               isReplicator(chain.bodyB) !== isReplicator(chain.bodyA)
             ) {
-              //const otherBody = currentReplicator === bodyA ? bodyB : bodyA;
-              // chainReplicators.push(otherBody);
               World.remove(world, chain);
-              //toRemove.push(chain);
-
-              replicators[currentReplicatorIndex].attachedBlobs = [];
-              //replicators.add()
+              toRemove.push(chain);
             }
           });
-          console.log(chainReplicators);
           replicators.push({
-            replicator: chainReplicators,
+            replicator: replicators[currentReplicatorIndex].attachedBlobs,
             attachedBlobs: [],
+            name: "new rep",
           });
+
           toRemove.forEach((tr) => chainConstraints.splice(tr, 1));
+          replicators[currentReplicatorIndex].attachedBlobs = [];
         }
       }
     }
@@ -209,7 +201,10 @@ function isReplicator(body) {
 }
 // Function to count the number of connections for a blob
 function countBlobConnections(blob) {
-  return chainConstraints.filter(
+  const count = chainConstraints.filter(
     (constraint) => constraint.bodyA === blob || constraint.bodyB === blob
   ).length;
+
+  console.log(count);
+  return count;
 }
