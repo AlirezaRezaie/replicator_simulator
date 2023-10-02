@@ -8,40 +8,63 @@ function handleCollisions(event) {
 
     const colorA = bodyA.render.fillStyle;
     const colorB = bodyB.render.fillStyle;
-    var replicator = null;
+    var replicatorBlob = null;
+    var currentReplicatorIndex = null;
+    var currentReplicator = null;
 
-    [bodyA, bodyB].forEach((element) => {
+    replicators.forEach((rpl) => {
+      if (rpl.replicator.includes(bodyA) || rpl.replicator.includes(bodyB)) {
+        currentReplicatorIndex = replicators.indexOf(rpl);
+        currentReplicator = replicators[currentReplicatorIndex].replicator;
+      }
+      const current = getReplicatorBasedOnAttachments(bodyA, bodyB);
+      if (current) {
+        console.log(replicators.indexOf(current));
+        currentReplicatorIndex = replicators.indexOf(current);
+      }
+    });
+
+    [(bodyA, bodyB)].forEach((element) => {
       if (isReplicator(element)) {
-        replicator = element;
+        replicatorBlob = element;
       }
     });
 
     // Check if the collision involves blob pairs that should be connected
     if (
-      colorA === colorB &&
       isReplicator(bodyA) !== isReplicator(bodyB) &&
-      countBlobConnections(replicator) <= checkReplicatorConnection(replicator)
+      countBlobConnections(replicatorBlob) <=
+        checkReplicatorConnection(replicatorBlob)
     ) {
-      const replicatorPosition = replicator.position;
-      const otherBodyPosition =
-        replicator === bodyA ? bodyB.position : bodyA.position;
+      const replicatorPosition = replicatorBlob.position;
+      const otherBody = currentReplicator === bodyA ? bodyB : bodyA;
+      const otherBodyPosition = otherBody.position;
+
+      // add the other body to the list of attached blobs to the replicator
+
+      const replicatorBlob1 = currentReplicator[0];
+      const replicatorBlob2 = currentReplicator[3];
+
+      const angle = replicatorBlob1.angle;
+      const angle2 = replicatorBlob2.angle;
+
+      const vector1 = { x: Math.cos(angle), y: Math.sin(angle) };
+      const vector2 = { x: Math.cos(angle2), y: Math.sin(angle2) };
+
+      side = splitArea(
+        otherBodyPosition.x,
+        otherBodyPosition.y,
+        replicatorBlob1.position,
+        replicatorBlob2.position,
+        vector1,
+        vector2
+      );
 
       // Calculate the angle of the direction vector
-      const angle = Matter.Vector.angle(replicatorPosition, otherBodyPosition);
 
-      // Determine which side of the replicator the other body is on based on the angle
-      let side = null;
-      if (angle >= -Math.PI / 4 && angle < Math.PI / 4) {
-        side = "right";
-      } else if (angle >= Math.PI / 4 && angle < (3 * Math.PI) / 4) {
-        side = "bottom";
-      } else if (angle >= (3 * Math.PI) / 4 || angle < -(3 * Math.PI) / 4) {
-        side = "left";
-      } else {
-        side = "top";
-      }
+      if (side == "blue" && colorA === colorB) {
+        replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
 
-      if (side == "top") {
         const constraint = Constraint.create({
           bodyA: bodyA,
           bodyB: bodyB,
@@ -52,7 +75,67 @@ function handleCollisions(event) {
         chainConstraints.push(constraint);
       }
     }
+    if (currentReplicatorIndex !== null) {
+      if (
+        replicators[currentReplicatorIndex].attachedBlobs.includes(bodyA) &&
+        replicators[currentReplicatorIndex].attachedBlobs.includes(bodyB) &&
+        shouldConnect(colorA, colorB)
+      ) {
+        const constraint = Constraint.create({
+          bodyA: bodyA,
+          bodyB: bodyB,
+          length: 60,
+          stiffness: 0.8,
+        });
+        World.add(world, constraint);
+        chainConstraints.push(constraint);
+
+        // check if it has made a complete replicator itself
+        // so we should first check if the replicator blob list has made it full (4 blobs)
+        // and also each attached blob has two connections (which means it also attached to its sister blob)
+        // then we for each blob close its connection to its same color replicator blob (corresponding replicator blob)
+        // and it will become a new replicator so we have to push it in the replicators list
+        if (
+          replicators[currentReplicatorIndex].attachedBlobs.length === 4 &&
+          replicators[currentReplicatorIndex].attachedBlobs.every(
+            (blob) =>
+              countBlobConnections(blob) == checkReplicatorConnection(blob)
+          )
+        ) {
+          console.log("replicator finished replicating time to detatch");
+        }
+      }
+    }
   });
+}
+
+function getReplicatorBasedOnAttachments(attach1, attach2) {
+  for (let i = 0; i < replicators.length; i++) {
+    replicator = replicators[i];
+    const currentList = replicator.attachedBlobs;
+    if (currentList.includes(attach1) && currentList.includes(attach2)) {
+      return replicator;
+    }
+  }
+  return null; // Return null if not found
+}
+
+function splitArea(x, y, dot1, dot4, vector1, vector2) {
+  // Calculate vectors from dot1 to the given point (x, y)
+  const vectorToPoint = { x: x - dot1.x, y: y - dot1.y };
+
+  // Calculate dot products
+  const dotProduct1 = vectorToPoint.x * vector1.x + vectorToPoint.y * vector1.y;
+  const dotProduct2 = vectorToPoint.x * vector2.x + vectorToPoint.y * vector2.y;
+
+  // Check which side of the border the point is on
+  if (dotProduct1 >= 0 && dotProduct2 >= 0) {
+    // Point is in the red area
+    return "red";
+  } else {
+    // Point is in the blue area
+    return "blue";
+  }
 }
 
 function checkReplicatorConnection(replicator) {
@@ -90,7 +173,7 @@ function shouldConnect(colorA, colorB) {
   );
 }
 function isReplicator(body) {
-  return replicators.some((replicator) => replicator.includes(body));
+  return replicators.some((rpl) => rpl.replicator.includes(body));
 }
 // Function to count the number of connections for a blob
 function countBlobConnections(blob) {

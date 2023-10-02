@@ -41,7 +41,7 @@ const walls = [
 World.add(world, walls);
 
 // Create multiple balls with random positions and add them to the world
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 50; i++) {
   var blob = new simBlob();
   const ball = blob.body;
   balls.push(ball);

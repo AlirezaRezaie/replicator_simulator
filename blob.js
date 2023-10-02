@@ -36,5 +36,5 @@ function createReplicator() {
     chainConstraints.push(constraint);
   }
   World.add(world, [...chainBlobs, ...chainConstraints]);
-  replicators.push(chainBlobs);
+  replicators.push({ replicator: chainBlobs, attachedBlobs: [] });
 }
