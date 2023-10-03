@@ -58,40 +58,15 @@ function handleCollisions(event) {
           }
         }
 
-        if (attachedBlob) {
-          const xBlob = attachedBlob.position.x;
-          const yBlob = attachedBlob.position.y;
-
-          // Calculate the distance between the blob to attach and the current blob in the chain
-          const distance = Math.sqrt(
-            (xBlob - otherBody.position.x) ** 2 +
-              (yBlob - otherBody.position.x) ** 2
-          );
-
-          // You can adjust this threshold to determine what's considered the same side
-          const threshold = 230;
-          console.log();
-          if (distance <= threshold) {
-            side = "left";
-
-            console.log("f");
-          } else {
-            side = "right";
-            console.log("g");
-          }
-        }
-
-        if (goodDistance) {
-          replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
-          const constraint = Constraint.create({
-            bodyA: bodyA,
-            bodyB: bodyB,
-            length: 60,
-            stiffness: 0.8,
-          });
-          World.add(world, constraint);
-          chainConstraints.push(constraint);
-        }
+        replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
+        const constraint = Constraint.create({
+          bodyA: bodyA,
+          bodyB: bodyB,
+          length: 60,
+          stiffness: 0.8,
+        });
+        World.add(world, constraint);
+        chainConstraints.push(constraint);
       }
     }
 
@@ -161,7 +136,7 @@ function handleCollisions(event) {
 
             replicators[currentReplicatorIndex].attachedBlobs = [];
           }
-        }, 10);
+        }, 10000);
         // check if it has made a complete replicator itself
         // so we should first check if the replicator blob list has made it full (4 blobs)
         // and also each attached blob has two connections (which means it also attached to its sister blob)
