@@ -59,23 +59,25 @@ function handleCollisions(event) {
         }
 
         if (attachedBlob) {
-          const distance = calculateDistance(
-            attachedBlob.position,
-            otherBody.position
+          const xBlob = attachedBlob.position.x;
+          const yBlob = attachedBlob.position.y;
+
+          // Calculate the distance between the blob to attach and the current blob in the chain
+          const distance = Math.sqrt(
+            (xBlob - otherBody.position.x) ** 2 +
+              (yBlob - otherBody.position.x) ** 2
           );
-          const isAboveA = isPointAboveLine(
-            getReplicatorBlobByColor("green", currentReplicatorIndex).position,
-            getReplicatorBlobByColor("blue", currentReplicatorIndex).position,
-            attachedBlob.position
-          );
-          const isAboveB = isPointAboveLine(
-            getReplicatorBlobByColor("green", currentReplicatorIndex).position,
-            getReplicatorBlobByColor("blue", currentReplicatorIndex).position,
-            otherBody.position
-          );
-          console.log(isAboveA, isAboveB);
-          if (isAboveA !== isAboveB) {
-            goodDistance = false;
+
+          // You can adjust this threshold to determine what's considered the same side
+          const threshold = 230;
+          console.log();
+          if (distance <= threshold) {
+            side = "left";
+
+            console.log("f");
+          } else {
+            side = "right";
+            console.log("g");
           }
         }
 
@@ -109,6 +111,57 @@ function handleCollisions(event) {
         World.add(world, constraint);
         chainConstraints.push(constraint);
 
+        setTimeout(() => {
+          if (
+            replicators[currentReplicatorIndex].attachedBlobs.length === 4 &&
+            replicators[currentReplicatorIndex].attachedBlobs.every(
+              (blob) => countBlobConnections(blob) >= 2
+            )
+          ) {
+            console.log("destroying the replicator attachments");
+            var toRemove = [];
+
+            chainConstraints.forEach((chain) => {
+              if (
+                replicators[currentReplicatorIndex].replicator.includes(
+                  chain.bodyA
+                ) !==
+                  replicators[currentReplicatorIndex].replicator.includes(
+                    chain.bodyB
+                  ) ||
+                replicators[currentReplicatorIndex].replicator.includes(
+                  chain.bodyB
+                ) !==
+                  replicators[currentReplicatorIndex].replicator.includes(
+                    chain.bodyA
+                  )
+              ) {
+                console.log("removing chain");
+                World.remove(world, chain);
+                toRemove.push(chain);
+              }
+
+              if (
+                replicators[currentReplicatorIndex].attachedBlobs.includes(
+                  chain.bodyA
+                ) &&
+                replicators[currentReplicatorIndex].attachedBlobs.includes(
+                  chain.bodyB
+                )
+              ) {
+                console.log("removing chain");
+                World.remove(world, chain);
+                toRemove.push(chain);
+              }
+            });
+
+            chainConstraints = chainConstraints.filter(
+              (item) => !toRemove.includes(item)
+            );
+
+            replicators[currentReplicatorIndex].attachedBlobs = [];
+          }
+        }, 10);
         // check if it has made a complete replicator itself
         // so we should first check if the replicator blob list has made it full (4 blobs)
         // and also each attached blob has two connections (which means it also attached to its sister blob)
