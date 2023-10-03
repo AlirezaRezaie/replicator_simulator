@@ -25,10 +25,6 @@ function handleCollisions(event) {
     });
     const otherBody = replicatorBlob === bodyA ? bodyB : bodyA;
 
-    if (currentReplicatorIndex === 1) {
-      console.log(replicators[0]);
-    }
-
     // Check if the collision involves blob pairs that should be connected
     if (
       currentReplicator &&
@@ -37,28 +33,8 @@ function handleCollisions(event) {
       countBlobConnections(replicatorBlob) ===
         checkReplicatorConnection(replicatorBlob)
     ) {
-      const replicatorPosition = replicatorBlob.position;
-      const otherBodyPosition = otherBody.position;
-
-      // add the other body to the list of attached blobs to the replicator
-
-      const replicatorBlob1 = currentReplicator[0];
-      const replicatorBlob2 = currentReplicator[3];
-
-      const angle = replicatorBlob1.angle;
-      const angle2 = replicatorBlob2.angle;
-
-      const vector1 = { x: Math.cos(angle), y: Math.sin(angle) };
-      const vector2 = { x: Math.cos(angle2), y: Math.sin(angle2) };
-
-      side = splitArea(
-        otherBodyPosition.x,
-        otherBodyPosition.y,
-        replicatorBlob1.position,
-        replicatorBlob2.position,
-        vector1,
-        vector2
-      );
+      // we should calculate the distance between the current blob that wants to attach the replicator
+      // and the blob that has attached
 
       // Calculate the angle of the direction vector
       if (
@@ -66,16 +42,54 @@ function handleCollisions(event) {
         isReplicator(bodyA) !== isReplicator(bodyB) &&
         replicators[currentReplicatorIndex].attachedBlobs.length < 4
       ) {
-        replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
-        console.log(replicators);
-        const constraint = Constraint.create({
-          bodyA: bodyA,
-          bodyB: bodyB,
-          length: 60,
-          stiffness: 0.8,
-        });
-        World.add(world, constraint);
-        chainConstraints.push(constraint);
+        var attachedBlob = null;
+        var goodDistance = true;
+        if (replicators[currentReplicatorIndex].attachedBlobs !== 3) {
+          if (otherBody.render.fillStyle === "green") {
+            attachedBlob = getAttachedBlobByColor(
+              "blue",
+              currentReplicatorIndex
+            );
+          } else if (otherBody.render.fillStyle === "blue") {
+            attachedBlob = getAttachedBlobByColor(
+              "green",
+              currentReplicatorIndex
+            );
+          }
+        }
+
+        if (attachedBlob) {
+          const distance = calculateDistance(
+            attachedBlob.position,
+            otherBody.position
+          );
+          const isAboveA = isPointAboveLine(
+            getReplicatorBlobByColor("green", currentReplicatorIndex).position,
+            getReplicatorBlobByColor("blue", currentReplicatorIndex).position,
+            attachedBlob.position
+          );
+          const isAboveB = isPointAboveLine(
+            getReplicatorBlobByColor("green", currentReplicatorIndex).position,
+            getReplicatorBlobByColor("blue", currentReplicatorIndex).position,
+            otherBody.position
+          );
+          console.log(isAboveA, isAboveB);
+          if (isAboveA !== isAboveB) {
+            goodDistance = false;
+          }
+        }
+
+        if (goodDistance) {
+          replicators[currentReplicatorIndex].attachedBlobs.push(otherBody);
+          const constraint = Constraint.create({
+            bodyA: bodyA,
+            bodyB: bodyB,
+            length: 60,
+            stiffness: 0.8,
+          });
+          World.add(world, constraint);
+          chainConstraints.push(constraint);
+        }
       }
     }
 
@@ -100,6 +114,7 @@ function handleCollisions(event) {
         // and also each attached blob has two connections (which means it also attached to its sister blob)
         // then we for each blob close its connection to its same color replicator blob (corresponding replicator blob)
         // and it will become a new replicator so we have to push it in the replicators list
+
         if (
           replicators[currentReplicatorIndex].attachedBlobs.length === 4 &&
           replicators[currentReplicatorIndex].attachedBlobs.every(
@@ -107,8 +122,6 @@ function handleCollisions(event) {
               countBlobConnections(blob) === checkReplicatorConnection1(blob)
           )
         ) {
-          console.log(replicators[0]);
-
           console.log("replicator finished replicating time to detatch");
           var toRemove = [];
 
@@ -143,12 +156,29 @@ function handleCollisions(event) {
           );
 
           replicators[currentReplicatorIndex].attachedBlobs = [];
-
-          console.log(replicators[0]);
         }
       }
     }
   });
+}
+
+function getAttachedBlobByColor(color, replicatorIndex) {
+  var colorBlob = null;
+  replicators[replicatorIndex].attachedBlobs.forEach((blob) => {
+    if (blob.render.fillStyle === color) {
+      colorBlob = blob;
+    }
+  });
+  return colorBlob;
+}
+function getReplicatorBlobByColor(color, replicatorIndex) {
+  var colorBlob = null;
+  replicators[replicatorIndex].replicator.forEach((blob) => {
+    if (blob.render.fillStyle === color) {
+      colorBlob = blob;
+    }
+  });
+  return colorBlob;
 }
 
 function isReplicatorChain(blob) {
