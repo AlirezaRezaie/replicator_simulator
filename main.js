@@ -9,11 +9,14 @@ const Constraint = Matter.Constraint;
 // Create an engine and world
 const engine = Engine.create();
 const world = engine.world;
-const chainConstraints = [];
 const balls = [];
 const replicators = [];
 const blobColors = ["red", "blue", "green", "yellow"]; // Use CSS color names
 const allowedConnections = generateAllowedConnections(blobColors);
+
+var chainConstraints = [];
+var inProgressChain = [];
+
 console.log(allowedConnections);
 // Disable gravity
 engine.world.gravity.y = 0;
@@ -62,6 +65,32 @@ Events.on(engine, "beforeUpdate", function () {
 
 // Attach the collision handler to the engine's collisionStart event
 Events.on(engine, "collisionStart", handleCollisions);
+// Define a function to run on each frame
+function onEachFrame() {
+  const canvas = document.querySelector("canvas");
+  const overlayCtx = canvas.getContext("2d");
+  // Assuming you have an array of bodies
+  bodies = world.bodies;
+  for (let i = 0; i < bodies.length; i++) {
+    const body = bodies[i];
+
+    // Set the text style
+    overlayCtx.fillStyle = "white";
+    overlayCtx.font = "12px Arial";
+
+    // Calculate the center position of the body
+    const centerX = body.position.x;
+    const centerY = body.position.y;
+
+    // Draw the body's ID as text on the canvas
+    overlayCtx.fillText(`ID: ${body.id}`, centerX - 15, centerY);
+  }
+  // Your code to run on each frame update goes here
+  // This function will be called before each physics update frame.
+}
+
+// Attach the custom function to the beforeUpdate event
+Events.on(engine, "beforeUpdate", onEachFrame);
 
 // Run the engine
 Engine.run(engine);
