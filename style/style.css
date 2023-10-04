@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "Gabarito";
+  src: url("../fonts/Gabarito-VariableFont_wght.ttf"),
+}
 body {
   background-color: #2f3640;
   background-image: url("../img/dna.svg");
@@ -7,7 +11,7 @@ body {
   justify-content: center;
   height: 100vh;
   align-items: center;
-  font-family: "Gabarito", cursive;
+  font-family: "Gabarito";
 }
 
 .title {
