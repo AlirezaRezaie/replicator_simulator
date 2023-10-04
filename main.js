@@ -23,10 +23,10 @@ engine.world.gravity.y = 0;
 
 // Create a canvas
 const render = Render.create({
-  element: document.body,
+  element: document.querySelector('.simulator'),
   engine: engine,
   options: {
-    width: 800,
+    width: 1260,
     height: 600,
     wireframes: false,
   },
@@ -34,17 +34,17 @@ const render = Render.create({
 
 // Create boundary walls to keep balls within the canvas
 const walls = [
-  Bodies.rectangle(400, 0, 800, 20, { isStatic: true }),
-  Bodies.rectangle(400, 600, 800, 20, { isStatic: true }),
+  Bodies.rectangle(640, 0, 1260, 20, { isStatic: true }),
+  Bodies.rectangle(640, 600, 1260, 20, { isStatic: true }),
   Bodies.rectangle(0, 300, 20, 600, { isStatic: true }),
-  Bodies.rectangle(800, 300, 20, 600, { isStatic: true }),
+  Bodies.rectangle(1260, 300, 20, 600, { isStatic: true }),
 ];
 
 // Add the walls to the world
 World.add(world, walls);
 
 // Create multiple balls with random positions and add them to the world
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 100; i++) {
   var blob = new simBlob();
   const ball = blob.body;
   balls.push(ball);
