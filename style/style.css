@@ -56,8 +56,53 @@ canvas {
   }
 
   .title {
-    font-size: 24px; /* Decrease font size for smaller screens */
+    font-size: 18px; /* Decrease font size for smaller screens */
+    margin-top: 20px; /* Add some top margin to the title for spacing */
+    text-align: center; /* Center-align the title */
+    white-space: normal; /* Allow the title to wrap onto multiple lines */
   }
 
   /* Adjust other styles as needed for smaller screens */
+}
+
+/* For screens smaller than 768px (typical phone width) */
+@media (max-width: 768px) {
+  body {
+    background-size: 20px; /* Adjust background size for smaller screens */
+  }
+
+  .title {
+    font-size: 18px; /* Decrease font size for smaller screens */
+    margin-top: 20px; /* Add some top margin to the title for spacing */
+    text-align: center; /* Center-align the title */
+    white-space: normal; /* Allow the title to wrap onto multiple lines */
+  }
+
+  /* Adjust other styles as needed for smaller screens */
+
+  canvas {
+    width: 100%; /* Make the canvas full width on smaller screens */
+    height: auto; /* Automatically adjust the height */
+    max-width: none; /* Remove any maximum width */
+  }
+}
+
+/* For screens larger than 768px */
+@media (min-width: 769px) {
+  body {
+    background-size: 40px; /* Adjust background size for larger screens */
+  }
+
+  .title {
+    font-size: 36px; /* Increase font size for larger screens */
+    margin-top: 40px; /* Add more top margin for spacing */
+  }
+
+  canvas {
+    width: 100%; /* Set canvas width to 80% of the screen width on larger screens */
+    height: auto; /* Automatically adjust the height */
+    max-width: none; /* Remove any maximum width */
+  }
+
+  /* Reset other styles for larger screens if necessary */
 }
