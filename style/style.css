@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Gabarito";
-  src: url("../fonts/Gabarito-VariableFont_wght.ttf"),
+  src: url("../fonts/Gabarito-VariableFont_wght.ttf");
 }
 body {
   background-color: #2f3640;
@@ -44,6 +44,20 @@ body {
 }
 
 canvas {
-  width: 50 !important;
-  height: 50 !important;
+  width: 100%;
+  height: auto;
+  max-width: 400px; /* Set a maximum width if necessary */
+}
+
+/* For screens smaller than 768px (typical phone width) */
+@media (max-width: 768px) {
+  body {
+    background-size: 20px; /* Adjust background size for smaller screens */
+  }
+
+  .title {
+    font-size: 24px; /* Decrease font size for smaller screens */
+  }
+
+  /* Adjust other styles as needed for smaller screens */
 }
