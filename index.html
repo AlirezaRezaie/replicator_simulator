@@ -3,7 +3,48 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- bootstrap cdn -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style/style.css" />
     <title>Matter.js Simulation</title>
+
+    <div class="container flex-column">
+      <h3 class="title">
+        Exploring the Emergence of the First Cell from Random Molecules: A
+        Replicator Theory Simulation using Matter.js
+      </h3>
+      <p class="subtitle pt-2">please wait a couple of minutes to see the results 🙂...</p>
+      <div class="simulator"></div>
+      <div class="content">
+        <p>
+          In this simulation, we delve into the intriguing realm of replicator
+          theory. This theory proposes that given ample time, particles
+          <span class="important-content">(represented as blobs)</span>, and
+          energy
+          <span class="important-content"
+            >(simulated through random movements of the blobs)</span
+          >, the emergence of a random replicator with the ability to attract
+          similar structural units
+          <span class="important-content"
+            >(in this simulation, blobs of the same color attract)</span
+          >
+          can trigger a cascade effect.
+        </p>
+        <p>
+          Such a replicator has the potential to self-replicate, leading to the
+          creation of multiple iterations of itself, each potentially better
+          than the last. This iterative process may eventually culminate in the
+          formation of RNA, and who knows, perhaps even the birth of cells
+          themselves? 🧪🔬🌱
+        </p>
+      </div>
+    </div>
+
     <!-- Include Matter.js from a CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.17.1/matter.js"></script>
   </head>
@@ -12,5 +53,11 @@
     <script src="collisions.js"></script>
     <script src="utils.js"></script>
     <script src="main.js"></script>
+    <!-- bootstrap cdn -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
